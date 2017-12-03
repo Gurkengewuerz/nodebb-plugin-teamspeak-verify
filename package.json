@@ -1,0 +1,29 @@
+{
+  "name": "nodebb-plugin-teamspeak-verify",
+  "version": "1.0.1",
+  "description": "NodeBB TeamSpeak User Verify",
+  "main": "library.js",
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "teamspeak",
+    "verify"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gurkengewuerz/nodebb-plugin-teamspeak-verify"
+  },
+  "author": {
+    "name": "Gurkengewuerz",
+    "email": "niklas@gurkengewuerz.de"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "node-teamspeak": "^1.0.10",
+    "node-datetime": "^2.0.3"
+  },
+  "nbbpm": {
+    "compatibility": "^1.0.1"
+  }
+}

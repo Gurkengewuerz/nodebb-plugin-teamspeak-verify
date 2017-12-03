@@ -1,0 +1,36 @@
+{
+  "id": "nodebb-plugin-teamspeak-verify",
+  "name": "NodeBB TeamSpeak User Verify",
+  "description": "NodeBB Plugin that allows users to login/register via their Steam account.",
+  "url": "https://github.com/Gurkengewuerz/nodebb-plugin-teamspeak-verify",
+  "library": "./library.js",
+  "hooks": [
+    {
+      "hook": "filter:admin.header.build",
+      "method": "addMenuItem"
+    },
+    {
+      "hook": "static:app.load",
+      "method": "init"
+    },
+    {
+      "hook": "filter:user.account.edit",
+      "method": "editAccount"
+    },
+    {
+      "hook": "action:user.banned",
+      "method": "userBanned"
+    },
+    {
+      "hook": "filter:middleware.render",
+      "method": "updateTitle"
+    }
+  ],
+  "templates": "./templates",
+  "acpScripts": [
+    "static/lib/admin.js"
+  ],
+  "scripts": [
+    "static/lib/settings.js"
+  ]
+}
