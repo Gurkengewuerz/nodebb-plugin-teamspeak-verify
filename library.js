@@ -23,16 +23,18 @@ var log = {
 
 plugin.sentMessage = function (tsid, msg) {
     if (cl !== undefined) {
-        cl.send("clientgetids", {cluid: tsid}, function (err, response, rawResponse) {
-            if (response === undefined) {
-                log.warn("Client not found");
-            } else {
-                cl.send("sendtextmessage", {
-                    targetmode: 1,
-                    target: response.clid,
-                    msg: msg
-                });
-            }
+        plugin.connect(function () {
+            cl.send("clientgetids", {cluid: tsid}, function (err, response, rawResponse) {
+                if (response === undefined) {
+                    log.warn("Client not found");
+                } else {
+                    cl.send("sendtextmessage", {
+                        targetmode: 1,
+                        target: response.clid,
+                        msg: msg
+                    });
+                }
+            });
         });
         return true;
     } else {
@@ -42,15 +44,17 @@ plugin.sentMessage = function (tsid, msg) {
 
 plugin.addClientToGroup = function (tsid, servergroup) {
     if (cl !== undefined) {
-        cl.send("clientgetdbidfromuid", {cluid: tsid}, function (err, response, rawResponse) {
-            if (response === undefined) {
-                log.warn("Client not found");
-            } else {
-                cl.send("servergroupaddclient", {
-                    sgid: servergroup,
-                    cldbid: response.cldbid
-                });
-            }
+        plugin.connect(function () {
+            cl.send("clientgetdbidfromuid", {cluid: tsid}, function (err, response, rawResponse) {
+                if (response === undefined) {
+                    log.warn("Client not found");
+                } else {
+                    cl.send("servergroupaddclient", {
+                        sgid: servergroup,
+                        cldbid: response.cldbid
+                    });
+                }
+            });
         });
         return true;
     } else {
@@ -60,16 +64,19 @@ plugin.addClientToGroup = function (tsid, servergroup) {
 
 plugin.removeClientFromGroup = function (tsid, servergroup) {
     if (cl !== undefined) {
-        cl.send("clientgetdbidfromuid", {cluid: tsid}, function (err, response, rawResponse) {
-            if (response === undefined) {
-                log.warn("Client not found");
-            } else {
-                cl.send("servergroupdelclient", {
-                    sgid: servergroup,
-                    cldbid: response.cldbid
-                });
-            }
+        plugin.connect(function () {
+            cl.send("clientgetdbidfromuid", {cluid: tsid}, function (err, response, rawResponse) {
+                if (response === undefined) {
+                    log.warn("Client not found");
+                } else {
+                    cl.send("servergroupdelclient", {
+                        sgid: servergroup,
+                        cldbid: response.cldbid
+                    });
+                }
+            });
         });
+
         return true;
     } else {
         return false;
@@ -85,15 +92,8 @@ plugin.init = function (data, callback) {
         res.render('admin/plugins/teamspeak-verify', {});
     }
 
-    meta.settings.get('teamspeak-verify', function (err, settings) {
-        log.info("init client");
-        if (!err && settings["server"] && settings["port"] && settings["username"] && settings["password"] && settings["serid"] && settings["queryname"] && settings["sgroupid"]) {
-            cl = new TeamSpeakClient(settings["server"], parseInt(settings["port"]));
-            cl.send("login", {client_login_name: settings["username"], client_login_password: settings["password"]});
-            cl.send("use", {sid: parseInt(settings["serid"])});
-            cl.send("clientupdate", {client_nickname: settings["queryname"]});
-            log.info("client initialised")
-        }
+    plugin.connect(function () {
+        log.info("client initialised");
     });
 
     data.router.get('/admin/plugins/teamspeak-verify', data.middleware.admin.buildHeader, render);
@@ -191,12 +191,14 @@ plugin.init = function (data, callback) {
             if (data.indexOf(req.body.tsid) >= 0) {
                 res.json({error: true, info: "TS ID already verified"});
             } else {
-                cl.send("clientgetids", {cluid: req.body.tsid}, function (err, response, rawResponse) {
-                    if (err !== undefined) {
-                        res.json({error: true, info: "client not found"});
-                    } else {
-                        res.json({error: false, info: "ok"});
-                    }
+                plugin.connect(function () {
+                    cl.send("clientgetids", {cluid: req.body.tsid}, function (err, response, rawResponse) {
+                        if (err !== undefined) {
+                            res.json({error: true, info: "client not found"});
+                        } else {
+                            res.json({error: false, info: "ok"});
+                        }
+                    });
                 });
             }
         });
@@ -242,6 +244,26 @@ plugin.init = function (data, callback) {
 
     hostHelpers.setupPageRoute(data.router, '/user/:userslug/teamspeak', hostMiddleware, [hostMiddleware.checkGlobalPrivacySettings, hostMiddleware.checkAccountPermissions], controllers.renderSettings);
     callback();
+};
+
+plugin.connect = function (callback) {
+    meta.settings.get('teamspeak-verify', function (err, settings) {
+        if (cl && cl.send && typeof cl.send === "function") {
+            try {
+                cl.send("quit");
+            } catch (ex) {
+                log.warn("connection lost");
+            }
+        }
+
+        if (!err && settings["server"] && settings["port"] && settings["username"] && settings["password"] && settings["serid"] && settings["queryname"] && settings["sgroupid"]) {
+            cl = new TeamSpeakClient(settings["server"], parseInt(settings["port"]));
+            cl.send("login", {client_login_name: settings["username"], client_login_password: settings["password"]});
+            cl.send("use", {sid: parseInt(settings["serid"])});
+            cl.send("clientupdate", {client_nickname: settings["queryname"]});
+            callback();
+        }
+    });
 };
 
 plugin.userBanned = function (data, callback) {

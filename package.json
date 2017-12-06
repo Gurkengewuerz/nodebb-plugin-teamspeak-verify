@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-teamspeak-verify",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "NodeBB TeamSpeak User Verify",
   "main": "library.js",
   "keywords": [
