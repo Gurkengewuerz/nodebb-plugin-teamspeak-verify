@@ -1,11 +1,11 @@
 "use strict";
 
-var user = module.parent.require('./user.js'),
-    db = module.parent.require('../src/database.js'),
-    meta = module.parent.require('./meta'),
+var user = require.main.require("./src/user"),
+    db = require.main.require('./src/database'),
+    meta = require.main.require('./src/meta'),
     winston = require('winston'),
     TeamSpeakClient = require('node-teamspeak'),
-    loggedIn = module.parent.require('connect-ensure-login');
+    loggedIn = require.main.require('connect-ensure-login');
 
 var plugin = {};
 
@@ -242,7 +242,7 @@ plugin.init = function (data, callback) {
     });
 
 
-    hostHelpers.setupPageRoute(data.router, '/user/:userslug/teamspeak', hostMiddleware, [hostMiddleware.checkGlobalPrivacySettings, hostMiddleware.checkAccountPermissions], controllers.renderSettings);
+    hostHelpers.setupPageRoute(data.router, '/user/:userslug/teamspeak', hostMiddleware, [hostMiddleware.canViewUsers, hostMiddleware.checkAccountPermissions], controllers.renderSettings);
     callback();
 };
 
