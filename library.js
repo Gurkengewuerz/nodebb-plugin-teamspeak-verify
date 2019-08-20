@@ -294,13 +294,11 @@ plugin.updateTitle = function (data, callback) {
 };
 
 plugin.addMenuItem = function (custom_header, callback) {
-    if (cl !== undefined) {
-        custom_header.plugins.push({
-            'route': "/plugins/teamspeak-verify",
-            'icon': "fa-microphone",
-            'name': "Teamspeak"
-        });
-    }
+    custom_header.plugins.push({
+        'route': "/plugins/teamspeak-verify",
+        'icon': "fa-microphone",
+        'name': "Teamspeak"
+    });
 
     callback(null, custom_header);
 };
